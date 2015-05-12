@@ -1,30 +1,49 @@
-```{r results='asis', echo=FALSE}
+# An Analysis of the Effect of Manual vs Automatic Transmissions on Gas Mileage for a Sample of Cars Build in 1973 and 1974
+## Todd Flanders
+### `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
+========================================================
+
+
+```{r echo=FALSE}
 manual <- mtcars[mtcars$am==1,]
 automatic <- mtcars[mtcars$am==0,]
 
 fitRow <- function(predictor) {
+  meanX <- mean(mtcars[predictor][,1])
   fitAll <- lm(mtcars$mpg ~ mtcars[predictor][,1])
   fitManual <- lm(manual$mpg ~ manual[predictor][,1])
   fitAutomatic <- lm(automatic$mpg ~ automatic[predictor][,1])
-  
+  icTotal <- coef(fitAll)[1]
+  beta1Total <- coef(fitAll)[2]
+  icManual <- coef(fitManual)[1]
+  beta1Manual <- coef(fitManual)[2]
+  icAutomatic <- coef(fitAutomatic)[1]
+  beta1Automatic <- coef(fitAutomatic)[2]
+  mpgAtMean <- icTotal + (meanX * beta1Total)
+  mpgAtMeanManual <- icManual + (meanX * beta1Manual)
+  mpgAtMeanAutomatic <- icAutomatic + (meanX * beta1Automatic)
+
   r <- data.frame(
-    coef(fitAll)[1],
-    coef(fitAll)[2],
-    coef(fitManual)[1],
-    coef(fitManual)[2],
-    coef(fitAutomatic)[1],
-    coef(fitAutomatic)[2],
+    meanX,
+    mpgAtMean,
+    mpgAtMeanManual,
+    mpgAtMeanAutomatic,
+    icTotal,
+    beta1Total,
+    icManual,
+    beta1Manual,
+    icAutomatic,
+    beta1Automatic,
     summary(fitAll)$r.squared,
-    cor(fitAll$model[1], fitAll$model[2]),
-    summary(fitAll)$coefficients[1,4],
-    summary(fitAll)$coefficients[2,4]
+    cor(fitAll$model[1], fitAll$model[2])
   )
   
-  names(r) <- c("icTotal", "beta1Total", 
+  names(r) <- c("meanX", "mpg@mean", 
+                "mpg@meanManual", "mpg@meanAuto",
+                "icTotal", "beta1Total", 
                 "icManual", "beta1Manual", 
                 "icAuto", "beta1Auto", 
-                "r^2", "cor",
-                "icPVal", "beta1PVal")
+                "r^2", "cor")
   row.names(r) <- predictor
   
   r
@@ -49,10 +68,20 @@ candidateModels <- rbind(
 
 bestRSquared <- candidateModels[order(-candidateModels$r^2),] 
 
+```
+
+## Executive Summary
+Were manual transmissions or automatic transmissions better for gas mileage in 1974?
+
+This report analyzes data from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).  We have a small sample of `r nrow(mtcars)` cars.  `r nrow(automatic)` have automatic transmissions, and `r nrow(manual)` have manual transmissions.
+
+## Analysis
+Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions:
+
+```{r results='asis', echo=FALSE}
 library(xtable)
 print(xtable(bestRSquared, digits=4), type="html", format.args=list(big.mark = ",", decimal.mark = "."))
 ```
-
 
 We will eliminate data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.  We don't know what we would observe if we had cars with automatic transmissions and rear-ends geared for horsepower, and cars with manual transmissions geared for torque.  It is better to disregard the rear axle ration data in the mtcars data set.
 
