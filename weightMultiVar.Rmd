@@ -1,0 +1,32 @@
+> names(mtcars)
+ [1] "mpg"  "cyl"  "disp" "hp" "qsec" "vs"   "am"  
+[10] "gear" "carb"
+
+```{r}
+fit <- lm(mpg~wt+cyl, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~wt+disp, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~wt+hp, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~wt+qsec, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~qsec, data=mtcars)
+summary(fit)
+
+
+fit <- lm(mpg~wt+vs, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~wt+gear, data=mtcars)
+summary(fit)
+
+fit <- lm(mpg~wt+carb, data=mtcars)
+summary(fit)
+
+
+```

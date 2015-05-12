@@ -1,0 +1,103 @@
+```{r results='asis', echo=FALSE}
+manual <- mtcars[mtcars$am==1,]
+automatic <- mtcars[mtcars$am==0,]
+
+fitRow <- function(predictor) {
+  fitAll <- lm(mtcars$mpg ~ mtcars[predictor][,1])
+  fitManual <- lm(manual$mpg ~ manual[predictor][,1])
+  fitAutomatic <- lm(automatic$mpg ~ automatic[predictor][,1])
+  
+  r <- data.frame(
+    coef(fitAll)[1],
+    coef(fitAll)[2],
+    coef(fitManual)[1],
+    coef(fitManual)[2],
+    coef(fitAutomatic)[1],
+    coef(fitAutomatic)[2],
+    summary(fitAll)$r.squared,
+    cor(fitAll$model[1], fitAll$model[2]),
+    summary(fitAll)$coefficients[1,4],
+    summary(fitAll)$coefficients[2,4]
+  )
+  
+  names(r) <- c("icTotal", "beta1Total", 
+                "icManual", "beta1Manual", 
+                "icAuto", "beta1Auto", 
+                "r^2", "cor",
+                "icPVal", "beta1PVal")
+  row.names(r) <- predictor
+  
+  r
+}
+
+
+modelRow <- function(col) {
+  names(col)
+}
+
+candidateModels <- rbind(
+  fitRow("cyl"),
+  fitRow("disp"),
+  fitRow("hp"),
+  fitRow("drat"),
+  fitRow("wt"),
+  fitRow("qsec"),
+  fitRow("vs"),
+  fitRow("gear"),
+  fitRow("carb")
+)
+
+bestRSquared <- candidateModels[order(-candidateModels$r^2),] 
+
+library(xtable)
+print(xtable(bestRSquared, digits=4), type="html", format.args=list(big.mark = ",", decimal.mark = "."))
+```
+
+
+We will eliminate data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.  We don't know what we would observe if we had cars with automatic transmissions and rear-ends geared for horsepower, and cars with manual transmissions geared for torque.  It is better to disregard the rear axle ration data in the mtcars data set.
+
+```{r}
+library(ggplot2)
+p <- ggplot(data=mtcars, aes(x=drat, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
+```
+
+Car weights have the greatest correlation with mpg.  In general, heavier cars have the lowest mpg.
+
+
+```{r}
+cor(mtcars$mpg, mtcars$wt)
+fit <- lm(mpg~wt, data=mtcars)
+summary(fit)
+p <- ggplot(data=mtcars, aes(x=wt, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
+```
+
+TODO:  plot residuals to see if we have a pattern.  It looks like we do.  Grumble.  It seems we don't have a pattern if we lump automatic and manual together, but for manuals alone it seems heavier cars get less mpg.
+
+TODO:  see if there is correlation between the predictor and the residuals.  We should if there is a pattern, otherwise should be close to zero.
+
+
+```{r}
+
+p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
+p + geom_point() + geom_smooth(method = "lm")
+
+
+p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
+
+cov(fit$residuals, mtcars$wt)
+
+```
+
+
+TODO: analyze weight against other variables to see if we have patterns (weightMultiVar.Rmd).
+
+TODO:  Final plot that predicts mpg differences between automatic an manual transmissions.  Perhaps a table for each car as well.
+
+
+```{r commonHtml, child='commonHtml.Rmd'}
+```
+
+
