@@ -14,6 +14,30 @@ meanMpgAutomatic <- mean(automatic$mpg)
 meanMpg <- mean(mtcars$mpg)
 ```
 
+```{r graphByWt, echo=FALSE}
+graphByWt <- function(mtc) {
+  fit <- lm(mpg ~ wt + am + wt*am, data=mtc)
+  fitUnadjustedForTransType <- lm(mpg ~ wt, data=mtc)
+  plot(mtc$wt, mtc$mpg, type = "n", frame = FALSE)
+  abline(fitUnadjustedForTransType, lwd = 2, col="gray")
+
+  abline(h = mean(mtc[mtc$am==0,]$mpg), lwd = 3, col = "lightblue")
+  abline(h = mean(mtc[mtc$am==1,]$mpg), lwd = 3, col = "salmon")
+  abline(v = mean(mtc$wt), lwd=3, col = "seagreen")
+  abline(h = mean(mtc$mpg), lwd = 3, col = "seagreen")
+
+  ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
+  slopea = fit$coef[2]
+  icm = ica + fit$coef[3]
+  slopem = slopea + fit$coef[4]
+
+  abline(ica, slopea, lwd = 3, col="lightblue")
+  abline(icm, slopem, lwd = 3, col="salmon")
+
+  points(mtc$wt[mtc$am==0], mtc$mpg[mtc$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
+  points(mtc$wt[mtc$am==1], mtc$mpg[mtc$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)  
+}
+```
 
 ```{r echo=FALSE}
 fitRow <- function(predictor) {
@@ -87,6 +111,8 @@ This report analyzes data from the 1974 Motor Trend US magazine, and comprises f
 ## Conclusion
 Although there is great desire to answer the gas milage question with certainty, the data does not lead to an indubitable conclusion.  Although correlations are strong and P-values are significant, the input data does not give confidence that the resulting model represents the population of cars manufactured in 1973 and 1974.  We would like to have multiple vehicles of similar make and model with and without automatic transmissions.  Instead, we have a very small sample which represents a wide variety of passenger, sport, luxury, and muscle cars.
 
+There is some data to indicate that manual transmission are better for mpg overall (perhaps by 7 mpg), and other data to suggest that manual transmissions are better for light vehicles, and automatic transmissions are better for heavier vehicles.  This is highly speculative, because we have little data on heavy vehicles with manual transmissions, and we have little data on light vehicles with automatic transmissions.
+
 ## Analysis
 
 ### Marginal Values
@@ -100,51 +126,30 @@ library(xtable)
 print(xtable(bestRSquared, digits=4), type="html", format.args=list(big.mark = ",", decimal.mark = "."))
 ```
 
-The top three variables listed seem to make sense.  We should expect heavy cars with big engines to get worse milage than light cars with small engines.  Let's look at each variable individually.
+The top three variables listed seem to make sense.  We should expect heavy cars with big engines to get worse milage than light cars with small engines.  Let's look at the most important relationship, vehicle weight.
 
 ### wt -- weight in thousands of pounds
 
 It's no surprise that weight has the biggest impact on fuel efficiency.  More than 75% of the variance of the data is explained by weight.  
 
-The average vehicle weight is `r round(meanWeight * 1000,0)` pounds.  This is represented by the vertical green line.  The horizontal blue line represents the marginal mileage of vehicles with manual transmissions, and the horizontal pink link represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with an automatic transmission at a given weight.  The blue line is the expected mpg for a car with a manual transmission at a given weight.
+The average vehicle weight is `r round(meanWeight * 1000,0)` pounds.  This is represented by the vertical green line.  The horizontal pink line represents the marginal mileage of vehicles with manual transmissions, and the horizontal blue line represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with an automatic transmission at a given weight.  The blue line is the expected mpg for a car with a manual transmission at a given weight.
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
-fit <- lm(mpg ~ wt + am + wt*am, data=mtcars)
-fitUnadjustedForTransType <- lm(mpg ~ wt, data=mtcars)
-plot(mtcars$wt, mtcars$mpg, type = "n", frame = FALSE)
-abline(fitUnadjustedForTransType, lwd = 2, col="gray")
-
-# the marginal relationship is significant
-abline(h = meanMpgManual, lwd = 3, col = "lightblue")
-abline(h = meanMpgAutomatic, lwd = 3, col = "salmon")
-abline(v = meanWeight, lwd=3, col = "seagreen")
-abline(h = meanMpg, lwd = 3, col = "seagreen")
-
-ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
-slopea = fit$coef[2]
-icm = ica + fit$coef[3]
-slopem = slopea + fit$coef[4]
-
-abline(ica, slopea, lwd = 3, col="lightblue")
-abline(icm, slopem, lwd = 3, col="salmon")
-
-points(mtcars$wt[mtcars$am==0], mtcars$mpg[mtcars$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
-points(mtcars$wt[mtcars$am==1], mtcars$mpg[mtcars$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)
+graphByWt(mtcars)
 ```
 
-We see an immediate problem in the data.  We do not have a good representation of heavy cars with automatic transmissions, nor light cars with manual transmissions.  The data is clearly biased and unreliable.
+We see an immediate problem in the data.  We do not have a good representation of light cars with automatic transmissions, nor for heavy cars with manual transmissions.  The data is clearly biased and unreliable.  See appendix 1 for analysis on other variables.
 
-The remainder of this report will attempt to clean up the data in order to get a better representation of the effect of weight on mileage.  See appendix 1 for analysis on other variables.
-
-The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  Perhaps residuals for all three models (automatic, manual, and all cars)
-
-The following residual plot determines there are no interesting patterns in the residuals.  We will therefore not look for interacting variables to tighten up our parsimonious model of simple linear regression using weight and transmission type.
+The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  We will therefore not look for interacting variables to tighten up our parsimonious model of simple linear regression using weight and transmission type.
 
 ```{r residualPlotAll, echo=FALSE, fig.width=7, fig.height=4}
+fit <- lm(mpg ~ wt + am + wt*am, data=mtcars)
 plot(fit, which=1)
 ```
 
 Our three outliers are the Merc 240D, the Fiat 128 and the Toyota Corolla.  See appendix 2 for an adjusted model eliminating these outliers.  The model still has the same problem as the original.  We do not have a good representation of vehicles with different transmission types and varying weights in the original data.
+
+I was tempted to continue eliminating data until I got the model I wanted, but the only thing worst than not having the data I need is ignoring data that I have.
 
 ## Appendix 1 -- Alternative Confounders
 
@@ -213,28 +218,8 @@ p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 mtc <- mtcars[-c(8,18,20),]
-fit <- lm(mpg ~ wt + am + wt*am, data=mtc)
-fitUnadjustedForTransType <- lm(mpg ~ wt, data=mtc)
-plot(mtc$wt, mtc$mpg, type = "n", frame = FALSE)
-abline(fitUnadjustedForTransType, lwd = 2, col="gray")
-
-abline(h = mean(mtc[mtc$am==0,]$mpg), lwd = 3, col = "lightblue")
-abline(h = mean(mtc[mtc$am==1,]$mpg), lwd = 3, col = "salmon")
-abline(v = mean(mtc$wt), lwd=3, col = "seagreen")
-abline(h = mean(mtc$mpg), lwd = 3, col = "seagreen")
-
-ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
-slopea = fit$coef[2]
-icm = ica + fit$coef[3]
-slopem = slopea + fit$coef[4]
-
-abline(ica, slopea, lwd = 3, col="lightblue")
-abline(icm, slopem, lwd = 3, col="salmon")
-
-points(mtc$wt[mtc$am==0], mtc$mpg[mtc$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
-points(mtc$wt[mtc$am==1], mtc$mpg[mtc$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)
+graphByWt(mtc)
 ```
-
 
 ```{r commonHtml, child='commonHtml.Rmd'}
 ```
