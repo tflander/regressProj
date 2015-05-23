@@ -4,10 +4,18 @@
 ========================================================
 
 
-```{r echo=FALSE}
+```{r globalVariables, echo=FALSE}
+mtcars$amChar = sapply(mtcars$am, function(x) {if(x==0) "Automatic" else "Manual"})
 manual <- mtcars[mtcars$am==1,]
 automatic <- mtcars[mtcars$am==0,]
+meanWeight <- mean(mtcars$wt)
+meanMpgManual <- mean(manual$mpg)
+meanMpgAutomatic <- mean(automatic$mpg)
+meanMpg <- mean(mtcars$mpg)
+```
 
+
+```{r echo=FALSE}
 fitRow <- function(predictor) {
   meanX <- mean(mtcars[predictor][,1])
   fitAll <- lm(mtcars$mpg ~ mtcars[predictor][,1])
@@ -19,13 +27,11 @@ fitRow <- function(predictor) {
   beta1Manual <- coef(fitManual)[2]
   icAutomatic <- coef(fitAutomatic)[1]
   beta1Automatic <- coef(fitAutomatic)[2]
-  mpgAtMean <- icTotal + (meanX * beta1Total)
   mpgAtMeanManual <- icManual + (meanX * beta1Manual)
   mpgAtMeanAutomatic <- icAutomatic + (meanX * beta1Automatic)
 
   r <- data.frame(
     meanX,
-    mpgAtMean,
     mpgAtMeanManual,
     mpgAtMeanAutomatic,
     icTotal,
@@ -38,7 +44,7 @@ fitRow <- function(predictor) {
     cor(fitAll$model[1], fitAll$model[2])
   )
   
-  names(r) <- c("meanX", "mpg@mean", 
+  names(r) <- c("meanX", 
                 "mpg@meanManual", "mpg@meanAuto",
                 "icTotal", "beta1Total", 
                 "icManual", "beta1Manual", 
@@ -67,57 +73,148 @@ candidateModels <- rbind(
 )
 
 bestRSquared <- candidateModels[order(-candidateModels$r^2),] 
-
+library(ggplot2)
 ```
 
 ## Executive Summary
-Were manual transmissions or automatic transmissions better for gas mileage in 1974?
+We wish to answer the following questions:
+- Were manual transmissions or automatic transmissions better for gas mileage in 1974?
+- What is difference measured in miles per gallon?
+- What confidence do we have that our calulations represent the entire population of vehicles manufatured in 1973 and 1974?
 
 This report analyzes data from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).  We have a small sample of `r nrow(mtcars)` cars.  `r nrow(automatic)` have automatic transmissions, and `r nrow(manual)` have manual transmissions.
 
+## Conclusion
+Although there is great desire to answer the gas milage question with certainty, the data does not lead to an indubitable conclusion.  Although correlations are strong and P-values are significant, the input data does not give confidence that the resulting model represents the population of cars manufactured in 1973 and 1974.  We would like to have multiple vehicles of similar make and model with and without automatic transmissions.  Instead, we have a very small sample which represents a wide variety of passenger, sport, luxury, and muscle cars.
+
 ## Analysis
-Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions:
+
+### Marginal Values
+The average mileage in the sample data is `r round(meanMpg,0)` mpg, `r round(meanMpgManual,0)` for vehicles with manual transmissions, and `r round(meanMpgAutomatic,0)` for vehicles with automatic transmissions.  If there are no counfounding effects of other variables, we expect a vehicle with a manual transmission have `r round(meanMpgManual - meanMpgAutomatic,0)` more miles per gallon than a vehicle with an automatic transmission.
+
+### Potential Confounders
+Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions.  The data is sorted by best model fit to worse model fit according to the r^2 statistic:
 
 ```{r results='asis', echo=FALSE}
 library(xtable)
 print(xtable(bestRSquared, digits=4), type="html", format.args=list(big.mark = ",", decimal.mark = "."))
 ```
 
-We will eliminate data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.  We don't know what we would observe if we had cars with automatic transmissions and rear-ends geared for horsepower, and cars with manual transmissions geared for torque.  It is better to disregard the rear axle ration data in the mtcars data set.
+The top three variables listed seem to make sense.  We should expect heavy cars with big engines to get worse milage than light cars with small engines.  Let's look at each variable individually.
 
-```{r}
-library(ggplot2)
-p <- ggplot(data=mtcars, aes(x=drat, y=mpg))
-p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
+### wt -- weight in thousands of pounds
+
+It's no surprise that weight has the biggest impact on fuel efficiency.  More than 75% of the variance of the data is explained by weight.  
+
+The average vehicle weight is `r round(meanWeight * 1000,0)` pounds.  This is represented by the vertical green line.  The horizontal blue line represents the marginal mileage of vehicles with manual transmissions, and the horizontal pink link represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with an automatic transmission at a given weight.  The blue line is the expected mpg for a car with a manual transmission at a given weight.
+
+```{r echo=FALSE, fig.width=7, fig.height=4}
+fit <- lm(mpg ~ wt + am + wt*am, data=mtcars)
+fitUnadjustedForTransType <- lm(mpg ~ wt, data=mtcars)
+plot(mtcars$wt, mtcars$mpg, type = "n", frame = FALSE)
+abline(fitUnadjustedForTransType, lwd = 2, col="gray")
+
+# the marginal relationship is significant
+abline(h = meanMpgManual, lwd = 3, col = "lightblue")
+abline(h = meanMpgAutomatic, lwd = 3, col = "salmon")
+abline(v = meanWeight, lwd=3, col = "seagreen")
+ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
+slopea = fit$coef[2]
+icm = ica + fit$coef[3]
+slopem = slopea + fit$coef[4]
+
+abline(ica, slopea, lwd = 3, col="lightblue")
+abline(icm, slopem, lwd = 3, col="salmon")
+
+points(mtcars$wt[mtcars$am==0], mtcars$mpg[mtcars$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(mtcars$wt[mtcars$am==1], mtcars$mpg[mtcars$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)
 ```
 
-Car weights have the greatest correlation with mpg.  In general, heavier cars have the lowest mpg.
+We see an immediate problem in the data.  We do not have a good representation of heavy cars with automatic transmissions, nor light cars with manual transmissions.  The data is clearly biased and unreliable.
+
+### cyl  -- number of cylinders
+
+Our second best variable is number of cylinders.  Cars with more cylinders get worse fuel efficiency.  Four cylinder cars generally get better milage than six cylinder cars, and six cylinder cars generally get better milage than eight cylinder cars.
 
 
-```{r}
-cor(mtcars$mpg, mtcars$wt)
+```{r echo=FALSE, fig.width=7, fig.height=4}
 fit <- lm(mpg~wt, data=mtcars)
-summary(fit)
-p <- ggplot(data=mtcars, aes(x=wt, y=mpg))
-p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
+p <- ggplot(data=mtcars, aes(x=cyl, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-TODO:  plot residuals to see if we have a pattern.  It looks like we do.  Grumble.  It seems we don't have a pattern if we lump automatic and manual together, but for manuals alone it seems heavier cars get less mpg.
+### disp  -- engine displacement in cubic inches
 
-TODO:  see if there is correlation between the predictor and the residuals.  We should if there is a pattern, otherwise should be close to zero.
+Cars with big engines have worse fuel efficiency than cars with small engines.  We unfortuately do not have a good spread of engine displacement data for cars with manual transmissions.  The majority of cars with manual transmissions have small engines.  The execption is our two muscle cars -- the Ford Pantera L and the Maserati Bora.
+
+```{r echo=FALSE, fig.width=7, fig.height=4}
+fit <- lm(mpg~wt, data=mtcars)
+p <- ggplot(data=mtcars, aes(x=disp, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
 
 
-```{r}
+### hp -- Gross horsepower
+
+Cars with powerful engines have worse fuel efficiency than cars with less powerful (and presumably more efficient) engines.
+
+```{r echo=FALSE, fig.width=7, fig.height=4}
+fit <- lm(mpg~wt, data=mtcars)
+p <- ggplot(data=mtcars, aes(x=hp, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+### drat -- Rear axle ratio
+
+We will not consider data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.
+
+```{r echo=FALSE, fig.width=7, fig.height=4}
+p <- ggplot(data=mtcars, aes(x=drat, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+### vs -- Engine configuration (V vs Straight)
+```{r echo=FALSE, fig.width=7, fig.height=4}
+p <- ggplot(data=mtcars, aes(x=vs, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+### carb -- Number of carburators
+```{r echo=FALSE, fig.width=7, fig.height=4}
+p <- ggplot(data=mtcars, aes(x=carb, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+### gear -- Number of forward gears
+```{r echo=FALSE, fig.width=7, fig.height=4}
+p <- ggplot(data=mtcars, aes(x=gear, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+### qsec -- 1/4 mile time
+
+```{r echo=FALSE, fig.width=7, fig.height=4}
+p <- ggplot(data=mtcars, aes(x=qsec, y=mpg))
+p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
+```
+
+## TODO:  Figure out what to do with the rest of these charts and data
+
+TODO: figure out what residual plot makes sense to include in the final report
+
+The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  Perhaps residuals for all three models (automatic, manual, and all cars)
+
+```{r residualPlotAll, echo=FALSE, fig.width=7, fig.height=4}
 
 p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
 p + geom_point() + geom_smooth(method = "lm")
+```
 
+I don't know that it makes sense to split the residuals by transmission type...
 
+```{r residualPlotByTrans, echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
-
-cov(fit$residuals, mtcars$wt)
-
 ```
 
 

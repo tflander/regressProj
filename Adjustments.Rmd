@@ -1,0 +1,55 @@
+```{r echo=FALSE}
+# mtcars <- mtcars[-c(17,18,20),] # get rid of the imperial, fiat, and corolla
+fit <- lm(mpg ~ wt + am + wt*am, data=mtcars)
+fitu <- lm(mpg ~ wt, data=mtcars)
+
+
+
+```
+
+```{r echo=FALSE}
+plot(mtcars$wt, mtcars$mpg, type = "n", frame = FALSE)
+abline(fitu, lwd = 2, col="gray")
+
+# the marginal relationship is significant
+abline(h = mean(mtcars$mpg[mtcars$am==0]), lwd = 3, col = "lightblue")
+abline(h = mean(mtcars$mpg[mtcars$am==1]), lwd = 3, col = "salmon")
+abline(v = mean(mtcars$wt), lwd=3)
+ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
+slopea = fit$coef[2]
+icm = ica + fit$coef[3]
+slopem = slopea + fit$coef[4]
+
+abline(ica, slopea, lwd = 3, col="lightblue")
+abline(icm, slopem, lwd = 3, col="salmon")
+
+points(mtcars$wt[mtcars$am==0], mtcars$mpg[mtcars$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(mtcars$wt[mtcars$am==1], mtcars$mpg[mtcars$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)
+
+```
+
+
+```{r}
+dfb <- dfbetas(fit)
+
+levIc <- max(abs(dfbetas(fit)[,1]))
+levSlope <- max(abs(dfbetas(fit)[,2]))
+
+dfb[abs(dfb[,1]) == levIc]
+dfb[abs(dfb[,2]) == levSlope]
+
+dfb
+row.names(dfb[abs(dfb[,2]) == levSlope])
+
+plot(fit)
+
+```
+
+```{r}
+fit <- lm(mpg~wt, data=mtcars)
+fit2 <- update(fit, mpg~wt+disp)
+anova(fit,fit2)
+```
+
+Fail to reject that engine displacement has no effect on mpg for a car with a given weight.  In order to create a parsimonious model, We will disregard the interaction between weight and engine displacement.
+

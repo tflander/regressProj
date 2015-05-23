@@ -1,0 +1,29 @@
+```{r}
+fit <- lm(mpg ~ factor(am) + wt * disp, data=mtcars)
+summary(fit)
+
+icNoWtDisp <- summary(fit)$coef[1]
+slopeAuto <- summary(fit)$coef[2]
+```
+
+Call:
+lm(formula = mpg ~ am + wt * disp, data = mtcars)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.4949 -1.5777 -0.4487  1.2448  5.2833 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 48.441704   4.403928  11.000 1.77e-11 ***
+am          -1.813029   1.311660  -1.382 0.178227    
+wt          -7.729928   1.570978  -4.920 3.77e-05 ***
+disp        -0.061707   0.013591  -4.540 0.000105 ***
+wt:disp      0.013574   0.003477   3.904 0.000570 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.416 on 27 degrees of freedom
+Multiple R-squared:   0.86,  Adjusted R-squared:  0.8393 
+F-statistic: 41.48 on 4 and 27 DF,  p-value: 3.729e-11
+
