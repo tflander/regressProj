@@ -118,6 +118,8 @@ abline(fitUnadjustedForTransType, lwd = 2, col="gray")
 abline(h = meanMpgManual, lwd = 3, col = "lightblue")
 abline(h = meanMpgAutomatic, lwd = 3, col = "salmon")
 abline(v = meanWeight, lwd=3, col = "seagreen")
+abline(h = meanMpg, lwd = 3, col = "seagreen")
+
 ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
 slopea = fit$coef[2]
 icm = ica + fit$coef[3]
@@ -132,10 +134,23 @@ points(mtcars$wt[mtcars$am==1], mtcars$mpg[mtcars$am==1], pch = 21, col = "black
 
 We see an immediate problem in the data.  We do not have a good representation of heavy cars with automatic transmissions, nor light cars with manual transmissions.  The data is clearly biased and unreliable.
 
-### cyl  -- number of cylinders
+The remainder of this report will attempt to clean up the data in order to get a better representation of the effect of weight on mileage.  See appendix 1 for analysis on other variables.
 
-Our second best variable is number of cylinders.  Cars with more cylinders get worse fuel efficiency.  Four cylinder cars generally get better milage than six cylinder cars, and six cylinder cars generally get better milage than eight cylinder cars.
+The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  Perhaps residuals for all three models (automatic, manual, and all cars)
 
+The following residual plot determines there are no interesting patterns in the residuals.  We will therefore not look for interacting variables to tighten up our parsimonious model of simple linear regression using weight and transmission type.
+
+```{r residualPlotAll, echo=FALSE, fig.width=7, fig.height=4}
+plot(fit, which=1)
+```
+
+Our three outliers are the Merc 240D, the Fiat 128 and the Toyota Corolla.  See appendix 2 for an adjusted model eliminating these outliers.  The model still has the same problem as the original.  We do not have a good representation of vehicles with different transmission types and varying weights in the original data.
+
+## Appendix 1 -- Alternative Confounders
+
+We selected weight as the best determination of expected miles per gallon.  Here is the analysis of variables that we did not use.
+
+### Figure 1  -- number of cylinders
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 fit <- lm(mpg~wt, data=mtcars)
@@ -143,9 +158,7 @@ p <- ggplot(data=mtcars, aes(x=cyl, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### disp  -- engine displacement in cubic inches
-
-Cars with big engines have worse fuel efficiency than cars with small engines.  We unfortuately do not have a good spread of engine displacement data for cars with manual transmissions.  The majority of cars with manual transmissions have small engines.  The execption is our two muscle cars -- the Ford Pantera L and the Maserati Bora.
+### Figure 2 -- engine displacement in cubic inches
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 fit <- lm(mpg~wt, data=mtcars)
@@ -153,10 +166,7 @@ p <- ggplot(data=mtcars, aes(x=disp, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-
-### hp -- Gross horsepower
-
-Cars with powerful engines have worse fuel efficiency than cars with less powerful (and presumably more efficient) engines.
+### Figure 3 -- Gross horsepower
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 fit <- lm(mpg~wt, data=mtcars)
@@ -164,63 +174,66 @@ p <- ggplot(data=mtcars, aes(x=hp, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### drat -- Rear axle ratio
-
-We will not consider data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.
+### Figure 4 -- Rear axle ratio
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=drat, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### vs -- Engine configuration (V vs Straight)
+### Figure 5 -- Engine configuration (V vs Straight)
+
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=vs, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### carb -- Number of carburators
+### Figure 6 -- Number of carburators
+
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=carb, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### gear -- Number of forward gears
+### Figure 7 -- Number of forward gears
+
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=gear, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-### qsec -- 1/4 mile time
+### Figure 8 -- 1/4 mile time
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 p <- ggplot(data=mtcars, aes(x=qsec, y=mpg))
 p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ amChar)
 ```
 
-## TODO:  Figure out what to do with the rest of these charts and data
+## Appendix 2 -- Adjusted model eliminating the outliers Merc 240D, the Fiat 128 and the Toyota Corolla.
 
-TODO: figure out what residual plot makes sense to include in the final report
+```{r echo=FALSE, fig.width=7, fig.height=4}
+mtc <- mtcars[-c(8,18,20),]
+fit <- lm(mpg ~ wt + am + wt*am, data=mtc)
+fitUnadjustedForTransType <- lm(mpg ~ wt, data=mtc)
+plot(mtc$wt, mtc$mpg, type = "n", frame = FALSE)
+abline(fitUnadjustedForTransType, lwd = 2, col="gray")
 
-The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  Perhaps residuals for all three models (automatic, manual, and all cars)
+abline(h = mean(mtc[mtc$am==0,]$mpg), lwd = 3, col = "lightblue")
+abline(h = mean(mtc[mtc$am==1,]$mpg), lwd = 3, col = "salmon")
+abline(v = mean(mtc$wt), lwd=3, col = "seagreen")
+abline(h = mean(mtc$mpg), lwd = 3, col = "seagreen")
 
-```{r residualPlotAll, echo=FALSE, fig.width=7, fig.height=4}
+ica = fit$coef[1] # expected mpg of a zero wt car with auto trans
+slopea = fit$coef[2]
+icm = ica + fit$coef[3]
+slopem = slopea + fit$coef[4]
 
-p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
-p + geom_point() + geom_smooth(method = "lm")
+abline(ica, slopea, lwd = 3, col="lightblue")
+abline(icm, slopem, lwd = 3, col="salmon")
+
+points(mtc$wt[mtc$am==0], mtc$mpg[mtc$am==0], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(mtc$wt[mtc$am==1], mtc$mpg[mtc$am==1], pch = 21, col = "black", bg = "salmon", cex = 2)
 ```
-
-I don't know that it makes sense to split the residuals by transmission type...
-
-```{r residualPlotByTrans, echo=FALSE, fig.width=7, fig.height=4}
-p <- ggplot(data=mtcars, aes(x=wt, y=resid(fit)))
-p + geom_point() + geom_smooth(method = "lm") + facet_grid(. ~ am)
-```
-
-
-TODO: analyze weight against other variables to see if we have patterns (weightMultiVar.Rmd).
-
-TODO:  Final plot that predicts mpg differences between automatic an manual transmissions.  Perhaps a table for each car as well.
 
 
 ```{r commonHtml, child='commonHtml.Rmd'}

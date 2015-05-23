@@ -29,7 +29,7 @@ The average mileage in the sample data is 20 mpg, 24 for vehicles with manual tr
 Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions.  The data is sorted by best model fit to worse model fit according to the r^2 statistic:
 
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat May 23 09:22:32 2015 -->
+<!-- Sat May 23 11:25:22 2015 -->
 <table border=1>
 <tr> <th>  </th> <th> meanX </th> <th> mpg@meanManual </th> <th> mpg@meanAuto </th> <th> icTotal </th> <th> beta1Total </th> <th> icManual </th> <th> beta1Manual </th> <th> icAuto </th> <th> beta1Auto </th> <th> r^2 </th> <th> cor </th>  </tr>
   <tr> <td align="right"> wt </td> <td align="right"> 3.2172 </td> <td align="right"> 17.0681 </td> <td align="right"> 19.2358 </td> <td align="right"> 37.2851 </td> <td align="right"> -5.3445 </td> <td align="right"> 46.2945 </td> <td align="right"> -9.0843 </td> <td align="right"> 31.4161 </td> <td align="right"> -3.7859 </td> <td align="right"> 0.7528 </td> <td align="right"> -0.8677 </td> </tr>
@@ -55,61 +55,55 @@ The average vehicle weight is 3217 pounds.  This is represented by the vertical 
 
 We see an immediate problem in the data.  We do not have a good representation of heavy cars with automatic transmissions, nor light cars with manual transmissions.  The data is clearly biased and unreliable.
 
-### cyl  -- number of cylinders
-
-Our second best variable is number of cylinders.  Cars with more cylinders get worse fuel efficiency.  Four cylinder cars generally get better milage than six cylinder cars, and six cylinder cars generally get better milage than eight cylinder cars.
-
-
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
-
-### disp  -- engine displacement in cubic inches
-
-Cars with big engines have worse fuel efficiency than cars with small engines.  We unfortuately do not have a good spread of engine displacement data for cars with manual transmissions.  The majority of cars with manual transmissions have small engines.  The execption is our two muscle cars -- the Ford Pantera L and the Maserati Bora.
-
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
-
-
-### hp -- Gross horsepower
-
-Cars with powerful engines have worse fuel efficiency than cars with less powerful (and presumably more efficient) engines.
-
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
-
-### drat -- Rear axle ratio
-
-We will not consider data for rear axle ratio, since we do not have a good spread of data across manual and automatic transmissions.  In the mtcars data set, the automatic transmissions were geared lower for torque, which should be better for mpg. The manual transmissions were geared higher for horsepower, when should be worse for mpg.  Since there is little overlap of the data, we cannot trust that a generated model reflects the entire population of cars.
-
-![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
-
-### vs -- Engine configuration (V vs Straight)
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
-
-### carb -- Number of carburators
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
-
-### gear -- Number of forward gears
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
-
-### qsec -- 1/4 mile time
-
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
-
-## TODO:  Figure out what to do with the rest of these charts and data
-
-TODO: figure out what residual plot makes sense to include in the final report
+The remainder of this report will attempt to clean up the data in order to get a better representation of the effect of weight on mileage.  See appendix 1 for analysis on other variables.
 
 The following residual plot shows that there is no obvious pattern for residuals based on the model that predicts mpg based on vehicle weight.  Perhaps residuals for all three models (automatic, manual, and all cars)
 
+The following residual plot determines there are no interesting patterns in the residuals.  We will therefore not look for interacting variables to tighten up our parsimonious model of simple linear regression using weight and transmission type.
+
 ![plot of chunk residualPlotAll](figure/residualPlotAll-1.png) 
 
-I don't know that it makes sense to split the residuals by transmission type...
+Our three outliers are the Merc 240D, the Fiat 128 and the Toyota Corolla.  See appendix 2 for an adjusted model eliminating these outliers.  The model still has the same problem as the original.  We do not have a good representation of vehicles with different transmission types and varying weights in the original data.
 
-![plot of chunk residualPlotByTrans](figure/residualPlotByTrans-1.png) 
+## Appendix 1 -- Alternative Confounders
 
+We selected weight as the best determination of expected miles per gallon.  Here is the analysis of variables that we did not use.
 
-TODO: analyze weight against other variables to see if we have patterns (weightMultiVar.Rmd).
+### Figure 1  -- number of cylinders
 
-TODO:  Final plot that predicts mpg differences between automatic an manual transmissions.  Perhaps a table for each car as well.
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+### Figure 2 -- engine displacement in cubic inches
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
+### Figure 3 -- Gross horsepower
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
+### Figure 4 -- Rear axle ratio
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
+### Figure 5 -- Engine configuration (V vs Straight)
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
+### Figure 6 -- Number of carburators
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
+### Figure 7 -- Number of forward gears
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
+
+### Figure 8 -- 1/4 mile time
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+
+## Appendix 2 -- Adjusted model eliminating the outliers Merc 240D, the Fiat 128 and the Toyota Corolla.
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
 
 
 
