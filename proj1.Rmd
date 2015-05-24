@@ -132,7 +132,7 @@ The top three variables listed seem to make sense.  We should expect heavy cars 
 
 It's no surprise that weight has the biggest impact on fuel efficiency.  More than 75% of the variance of the data is explained by weight.  
 
-The average vehicle weight is `r round(meanWeight * 1000,0)` pounds.  This is represented by the vertical green line.  The horizontal pink line represents the marginal mileage of vehicles with manual transmissions, and the horizontal blue line represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with an automatic transmission at a given weight.  The blue line is the expected mpg for a car with a manual transmission at a given weight.
+The average vehicle weight is `r round(meanWeight * 1000,0)` pounds.  This is represented by the vertical green line.  The horizontal pink line represents the marginal mileage of vehicles with manual transmissions, and the horizontal blue line represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with a manual transmission at a given weight.  The blue line is the expected mpg for a car with an automatic transmission at a given weight.
 
 ```{r echo=FALSE, fig.width=7, fig.height=4}
 graphByWt(mtcars)
@@ -149,7 +149,7 @@ plot(fit, which=1)
 
 Our three outliers are the Merc 240D, the Fiat 128 and the Toyota Corolla.  See appendix 2 for an adjusted model eliminating these outliers.  The model still has the same problem as the original.  We do not have a good representation of vehicles with different transmission types and varying weights in the original data.
 
-I was tempted to continue eliminating data until I got the model I wanted, but the only thing worst than not having the data I need is ignoring data that I have.
+I was tempted to continue eliminating data until I got the model I wanted, but the only thing worse than not having the data I need is ignoring data that I have.
 
 ## Appendix 1 -- Alternative Confounders
 

@@ -32,7 +32,7 @@ The average mileage in the sample data is 20 mpg, 24 for vehicles with manual tr
 Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions.  The data is sorted by best model fit to worse model fit according to the r^2 statistic:
 
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat May 23 13:08:13 2015 -->
+<!-- Sat May 23 23:25:13 2015 -->
 <table border=1>
 <tr> <th>  </th> <th> meanX </th> <th> mpg@meanManual </th> <th> mpg@meanAuto </th> <th> icTotal </th> <th> beta1Total </th> <th> icManual </th> <th> beta1Manual </th> <th> icAuto </th> <th> beta1Auto </th> <th> r^2 </th> <th> cor </th>  </tr>
   <tr> <td align="right"> wt </td> <td align="right"> 3.2172 </td> <td align="right"> 17.0681 </td> <td align="right"> 19.2358 </td> <td align="right"> 37.2851 </td> <td align="right"> -5.3445 </td> <td align="right"> 46.2945 </td> <td align="right"> -9.0843 </td> <td align="right"> 31.4161 </td> <td align="right"> -3.7859 </td> <td align="right"> 0.7528 </td> <td align="right"> -0.8677 </td> </tr>
@@ -52,7 +52,7 @@ The top three variables listed seem to make sense.  We should expect heavy cars 
 
 It's no surprise that weight has the biggest impact on fuel efficiency.  More than 75% of the variance of the data is explained by weight.  
 
-The average vehicle weight is 3217 pounds.  This is represented by the vertical green line.  The horizontal pink line represents the marginal mileage of vehicles with manual transmissions, and the horizontal blue line represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with an automatic transmission at a given weight.  The blue line is the expected mpg for a car with a manual transmission at a given weight.
+The average vehicle weight is 3217 pounds.  This is represented by the vertical green line.  The horizontal pink line represents the marginal mileage of vehicles with manual transmissions, and the horizontal blue line represents the marginal mileage for vehicles with automatic transmissions.  The grey diagonal line represents the expected mpg for a car at a given weight, unadjusted for automatic vs manual transmission.  The pink line is the expected mpg for a car with a manual transmission at a given weight.  The blue line is the expected mpg for a car with an automatic transmission at a given weight.
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 
@@ -64,7 +64,7 @@ The following residual plot shows that there is no obvious pattern for residuals
 
 Our three outliers are the Merc 240D, the Fiat 128 and the Toyota Corolla.  See appendix 2 for an adjusted model eliminating these outliers.  The model still has the same problem as the original.  We do not have a good representation of vehicles with different transmission types and varying weights in the original data.
 
-I was tempted to continue eliminating data until I got the model I wanted, but the only thing worst than not having the data I need is ignoring data that I have.
+I was tempted to continue eliminating data until I got the model I wanted, but the only thing worse than not having the data I need is ignoring data that I have.
 
 ## Appendix 1 -- Alternative Confounders
 
