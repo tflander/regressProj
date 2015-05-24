@@ -32,7 +32,7 @@ The average mileage in the sample data is 20 mpg, 24 for vehicles with manual tr
 Here is a table showing the analysis of nine aspects of design and their impact on mpg for cars with automatic or manual transmissions.  The data is sorted by best model fit to worse model fit according to the r^2 statistic:
 
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat May 23 23:25:13 2015 -->
+<!-- Sat May 23 23:33:43 2015 -->
 <table border=1>
 <tr> <th>  </th> <th> meanX </th> <th> mpg@meanManual </th> <th> mpg@meanAuto </th> <th> icTotal </th> <th> beta1Total </th> <th> icManual </th> <th> beta1Manual </th> <th> icAuto </th> <th> beta1Auto </th> <th> r^2 </th> <th> cor </th>  </tr>
   <tr> <td align="right"> wt </td> <td align="right"> 3.2172 </td> <td align="right"> 17.0681 </td> <td align="right"> 19.2358 </td> <td align="right"> 37.2851 </td> <td align="right"> -5.3445 </td> <td align="right"> 46.2945 </td> <td align="right"> -9.0843 </td> <td align="right"> 31.4161 </td> <td align="right"> -3.7859 </td> <td align="right"> 0.7528 </td> <td align="right"> -0.8677 </td> </tr>
